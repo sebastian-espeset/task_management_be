@@ -1,16 +1,25 @@
 class ProjectsController < ApplicationController
-    before_action :set_project, only: [:show, :update, :destroy]
-    before_action :authenticate_user!
+  before_action :set_project, only: [:show, :update, :destroy]
+  before_action :authenticate_user!
 
     # GET /projects
   def index
-    @projects = current_user.projects
-    render json: @projects
+    if current_user
+      @projects = current_user.projects
+      render json: @projects
+    else
+      render json: { error: 'Not Authorized' }, status: :unauthorized
+    end
   end
 
   # GET /projects/:id
   def show
-    render json: @project
+    
+    if current_user
+      render json: @project
+    else
+      render json: { error: 'Not Authorized' }, status: :unauthorized
+    end
   end
 
   # POST /projects
@@ -40,7 +49,9 @@ class ProjectsController < ApplicationController
 
   private
 
-  def set_project
+   # This method sets @project before the show, update, and destroy actions
+   def set_project
+    Rails.logger.info "Current User: #{current_user.inspect}"
     @project = current_user.projects.find(params[:id])
   end
 
